@@ -1,0 +1,84 @@
+---
+title: "SitioWebEstudiantesInicio"
+author: "Mr. Mario de la Vega"
+date: "2023-12-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+token = "420a4e06a4b07e52ab3e69bd9fabe4d1816c458754360c539e4156d5b23023c7"
+
+library("siebanxicor")
+library("openxlsx")
+library("plotly")
+##library("")
+setToken(token)
+```
+
+# Introducción
+
+En esta página web se hace un análisis muy sencillo del desempeño de las remuneraciones
+medias reales en los sectores manufacturero y comercial. Esto es una comparación al INPC.
+
+```{r echo=FALSE}
+# Definimos las series que se extraerán del Banxico:
+series = c("SL11439","SL11432","SP1")
+
+# Se extrae la información histórica definiendo las series a extraer y la fecha tanto inicial como final de los datos.
+tablaDatos = getSeriesData(series, '2008-01-01', '2023-09-01')
+
+datosEntrada=data.frame("Fecha"=tablaDatos$SP1$date,
+                        "INPC"=tablaDatos$SP1$value,
+                        "remunIndustrial"=tablaDatos$SL11439$value,
+                        "remunComercial"=tablaDatos$SL11432$value)
+
+datosEntrada$INPC=(datosEntrada$INPC/datosEntrada$INPC[1])*100
+
+datosEntrada$remunIndustrial=(datosEntrada$remunIndustrial/datosEntrada$remunIndustrial[1])*100
+
+datosEntrada$remunComercial=(datosEntrada$remunComercial/datosEntrada$remunComercial[1])*100
+
+##datatable(datosEntrada,
+##          colnames = c('Fecha', 'INPC general', 'Remuneraciones medias industriales', ##'Remuneraciones medias comerciales'),
+##          options = list(pageLength = 5))
+```
+
+
+```{r echo=FALSE}
+figura1Plotly=plot_ly()
+# Agrego la línea del INPC:
+figura1Plotly=add_trace(figura1Plotly,
+                        x=~Fecha,
+                        y=~INPC,
+                        data=datosEntrada,
+                        name="INPC",
+                        type="scatter",
+                        mode="lines")
+# Agrego la línea de las remuneraciones indutriales:
+figura1Plotly=add_trace(figura1Plotly,
+                        x=~Fecha,
+                        y=~remunIndustrial,
+                        data=datosEntrada,
+                        name="Remuneraciones reales (industrial)",
+                        type="scatter",
+                        mode="lines")
+# agrego la línea de las remuneraciones comerciales:
+figura1Plotly=add_trace(figura1Plotly,
+                        x=~Fecha,
+                        y=~remunComercial,
+                        data=datosEntrada,
+                        name="Remuneraciones reales (comercial)",
+                        type="scatter",
+                        mode="lines")
+# Le pongo las florecitas y arreglos visuales:
+figura1Plotly=layout(figura1Plotly,
+  title="Comparativo del incremento de las remuneraciones reales en los sectores industrial y comercial v.s. el INPC",
+  xaxis=list(title="Tiempo (meses)"),
+  yaxis=list(title="Valor base 100 al 1 de enero del 2008")
+)
+figura1Plotly
+
+```
+
