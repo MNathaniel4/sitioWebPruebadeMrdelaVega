@@ -4,7 +4,7 @@ author: "Mr. Mario de la Vega"
 date: "2023-12-12"
 output: html_document
 ---
-
+![](umsnh100a.jpg){with = 50%}
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
